@@ -1,8 +1,6 @@
 ﻿using Soenneker.Quark.DatePickers.Abstract;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Soenneker.Blazor.Utils.ResourceLoader.Abstract;
@@ -14,72 +12,42 @@ namespace Soenneker.Quark.DatePickers;
 public sealed class DatePickerInterop : IDatePickerInterop
 {
     private readonly IJSRuntime _jsRuntime;
-    private readonly ILogger<DatePickerInterop> _logger;
-    private readonly AsyncSingleton _cssInitializer;
-    private readonly AsyncSingleton _jsInitializer;
+    private readonly IResourceLoader _resourceLoader;
+    private readonly AsyncSingleton _scriptInitializer;
 
-    private const string _cssPath = "_content/Soenneker.Quark.DatePickers/css/datepicker.css";
-    private const string _jsInit = "QuarkDatePicker.attach";
-    private const string _jsPath = "_content/Soenneker.Quark.DatePickers/js/datepicker.js";
-    private const string _jsOutside = "QuarkDatePicker.registerOutsideClose";
+    private const string _module = "Soenneker.Quark.DatePickers/js/datepickerinterop.js";
+    private const string _moduleName = "DatePickerInterop";
 
-    public DatePickerInterop(IJSRuntime jSRuntime, ILogger<DatePickerInterop> logger, IResourceLoader resourceLoader)
+    public DatePickerInterop(IJSRuntime jSRuntime, IResourceLoader resourceLoader)
     {
         _jsRuntime = jSRuntime;
-        _logger = logger;
+        _resourceLoader = resourceLoader;
 
-        IResourceLoader loader = resourceLoader;
-        _cssInitializer = new AsyncSingleton(async (token, _) =>
+        _scriptInitializer = new AsyncSingleton(async (token, _) =>
         {
-            await loader.LoadStyle(_cssPath, cancellationToken: token);
-            return new object();
-        });
-
-        _jsInitializer = new AsyncSingleton(async (token, _) =>
-        {
-            await loader.LoadScript(_jsPath, cancellationToken: token);
+            await _resourceLoader.LoadStyle("_content/Soenneker.Quark.DatePickers/css/datepicker.css", cancellationToken: token);
+            await _resourceLoader.ImportModuleAndWaitUntilAvailable(_module, _moduleName, 100, token);
             return new object();
         });
     }
 
-    public async ValueTask Initialize(CancellationToken cancellationToken = default)
-    {
-        await _cssInitializer.Init(cancellationToken);
-        await _jsInitializer.Init(cancellationToken);
-    }
+    public ValueTask Initialize(CancellationToken cancellationToken = default) => _scriptInitializer.Init(cancellationToken);
 
     public async ValueTask Attach(ElementReference element, CancellationToken cancellationToken = default)
     {
-        await _cssInitializer.Init(cancellationToken);
-        await _jsInitializer.Init(cancellationToken);
-
-        try
-        {
-            await _jsRuntime.InvokeVoidAsync(_jsInit, cancellationToken, element);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "DatePicker attach failed (non-fatal)");
-        }
+        await _scriptInitializer.Init(cancellationToken);
+        await _jsRuntime.InvokeVoidAsync($"{_moduleName}.attach", cancellationToken, element);
     }
 
     public async ValueTask RegisterOutsideClose<T>(ElementReference container, DotNetObjectReference<T> dotNetRef, string methodName, CancellationToken cancellationToken = default) where T : class
     {
-        await _cssInitializer.Init(cancellationToken);
-        await _jsInitializer.Init(cancellationToken);
-
-        try
-        {
-            await _jsRuntime.InvokeVoidAsync(_jsOutside, cancellationToken, container, dotNetRef, methodName);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "DatePicker outside-close registration failed (non-fatal)");
-        }
+        await _scriptInitializer.Init(cancellationToken);
+        await _jsRuntime.InvokeVoidAsync($"{_moduleName}.registerOutsideClose", cancellationToken, container, dotNetRef, methodName);
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        return new ValueTask(Task.WhenAll(_cssInitializer.DisposeAsync().AsTask(), _jsInitializer.DisposeAsync().AsTask()));
+        await _resourceLoader.DisposeModule(_module);
+        await _scriptInitializer.DisposeAsync();
     }
 }
