@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Web;
@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Debugging;
 using Soenneker.Quark.DatePickers.Registrars;
 using Soenneker.Serilog.Sinks.Browser.Blazor.Registrars;
+using Soenneker.Quark.Themes.Registrars;
 
 namespace Soenneker.Quark.DatePickers.Demo;
 
@@ -30,6 +31,8 @@ public sealed class Program
             {
                 BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
             });
+
+            builder.Services.AddEmptyThemeProviderAsScoped();
 
             builder.Services.AddDatePickerAsScoped();
 
