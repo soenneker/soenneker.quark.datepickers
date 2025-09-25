@@ -4,13 +4,14 @@
 @using Microsoft.JSInterop
 @using Soenneker.Blazor.Extensions.EventCallback
 @using Soenneker.Extensions.String
-@using Soenneker.Quark.Dtos.Colors
+@using Soenneker.Quark.Components.Builders
+@using Soenneker.Quark.Components.Builders.Colors
 @using Soenneker.Quark.Enums.Size
 @using Soenneker.Quark.Validations
 @using Soenneker.Quark.Validations.Enums
 @inherits Soenneker.Quark.Components.Element
 @implements Soenneker.Quark.Validations.Abstract.IValidationInput
-@inject Soenneker.Quark.DatePickers.Abstract.IDatePickerInterop DatePickerInterop
+@inject Abstract.IDatePickerInterop DatePickerInterop
 
 @using Soenneker.Quark.Divs
 <Div OnElementRefReady="HandleContainerRefReady" @attributes="GetContainerAttributes()">
@@ -25,13 +26,13 @@
                 <button type="button" class="btn btn-sm btn-light qcal-nav" @onclick="NextMonth">›</button>
             </div>
             <div class="qcal-grid mt-2">
-                @foreach (var dow in _dayNames)
+                @foreach (string dow in _dayNames)
                 {
                     <div class="qcal-dow text-muted">@dow</div>
                 }
-                @foreach (var day in BuildMonthCells())
+                @foreach (Cell day in BuildMonthCells())
                 {
-                    var css = day.InMonth ? "qcal-day" : "qcal-day text-muted";
+                    string css = day.InMonth ? "qcal-day" : "qcal-day text-muted";
                     if (day.Date == DateOnly.FromDateTime(DateTime.Today))
                     {
                         css += " qcal-today";
@@ -79,7 +80,7 @@
     public DateOnly? Max { get; set; }
 
     [Parameter]
-    public Color Color { get; set; } = Color.Primary;
+    public CssValue<ColorBuilder> Color { get; set; } = Components.Builders.Colors.Color.Primary;
 
     [Parameter]
     public Size Size { get; set; } = Size.Default;
@@ -111,7 +112,7 @@
             return null;
 
         var text = e.Value.ToString();
-        if (DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+        if (DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly result))
             return result;
 
         return null;
@@ -149,8 +150,10 @@
 
     private string? GetColorClass()
     {
-        if (Color.IsTheme)
-            return $"form-control-{Color.Theme!.Value}";
+        bool isTheme = Color.TryGetBootstrapThemeToken(out string token);
+
+        if (isTheme)
+            return $"form-control-{token}";
 
         return null;
     }
@@ -266,9 +269,9 @@
 
     private void InitializeDayNames()
     {
-        var culture = CultureInfo.CurrentCulture;
-        var first = culture.DateTimeFormat.FirstDayOfWeek;
-        var names = culture.DateTimeFormat.AbbreviatedDayNames;
+        CultureInfo culture = CultureInfo.CurrentCulture;
+        DayOfWeek first = culture.DateTimeFormat.FirstDayOfWeek;
+        string[] names = culture.DateTimeFormat.AbbreviatedDayNames;
         _dayNames = Enumerable.Range(0, 7)
             .Select(i => names[((int)first + i) % 7])
             .ToArray();
@@ -279,14 +282,14 @@
     private IEnumerable<Cell> BuildMonthCells()
     {
         var firstOfMonth = new DateOnly(_displayMonth.Year, _displayMonth.Month, 1);
-        var culture = CultureInfo.CurrentCulture;
-        var startDow = culture.DateTimeFormat.FirstDayOfWeek;
+        CultureInfo culture = CultureInfo.CurrentCulture;
+        DayOfWeek startDow = culture.DateTimeFormat.FirstDayOfWeek;
         int offset = ((int)firstOfMonth.DayOfWeek - (int)startDow + 7) % 7;
-        var gridStart = firstOfMonth.AddDays(-offset);
+        DateOnly gridStart = firstOfMonth.AddDays(-offset);
 
         for (int i = 0; i < 42; i++)
         {
-            var d = gridStart.AddDays(i);
+            DateOnly d = gridStart.AddDays(i);
             bool inMonth = d.Month == _displayMonth.Month;
             bool disabled = (Min.HasValue && d < Min.Value) || (Max.HasValue && d > Max.Value);
             yield return new Cell(d, inMonth, disabled);
@@ -312,7 +315,7 @@
         private readonly DatePicker _owner;
         public OutsideCloseProxy(DatePicker owner) { _owner = owner; }
 
-        [Microsoft.JSInterop.JSInvokable]
+        [JSInvokable]
         public Task Close() => _owner.ClosePanel();
     }
 

@@ -38,29 +38,29 @@
     private DateOnly? _validatedDate;
     private DateTime? _validatedDateTime;
 
-    private void ValidateDate(Soenneker.Quark.Validations.Dtos.ValidatorEventArgs e)
+    private void ValidateDate(Validations.Dtos.ValidatorEventArgs e)
     {
         if (_validatedDate is null)
         {
-            e.Status = Soenneker.Quark.Validations.Enums.ValidationStatus.Error;
+            e.Status = Validations.Enums.ValidationStatus.Error;
             e.ErrorText = "Date is required.";
         }
         else
         {
-            e.Status = Soenneker.Quark.Validations.Enums.ValidationStatus.Success;
+            e.Status = Validations.Enums.ValidationStatus.Success;
         }
     }
 
-    private void ValidateDateTime(Soenneker.Quark.Validations.Dtos.ValidatorEventArgs e)
+    private void ValidateDateTime(Validations.Dtos.ValidatorEventArgs e)
     {
         if (_validatedDateTime is null)
         {
-            e.Status = Soenneker.Quark.Validations.Enums.ValidationStatus.Error;
+            e.Status = Validations.Enums.ValidationStatus.Error;
             e.ErrorText = "Date/time is required.";
         }
         else
         {
-            e.Status = Soenneker.Quark.Validations.Enums.ValidationStatus.Success;
+            e.Status = Validations.Enums.ValidationStatus.Success;
         }
     }
 }
