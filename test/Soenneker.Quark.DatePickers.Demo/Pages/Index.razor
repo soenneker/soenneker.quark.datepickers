@@ -38,29 +38,29 @@
     private DateOnly? _validatedDate;
     private DateTime? _validatedDateTime;
 
-    private void ValidateDate(Validations.Dtos.ValidatorEventArgs e)
+    private void ValidateDate(ValidatorEventArgs e)
     {
         if (_validatedDate is null)
         {
-            e.Status = Validations.Enums.ValidationStatus.Error;
+            e.Status = ValidationStatus.Error;
             e.ErrorText = "Date is required.";
         }
         else
         {
-            e.Status = Validations.Enums.ValidationStatus.Success;
+            e.Status = ValidationStatus.Success;
         }
     }
 
-    private void ValidateDateTime(Validations.Dtos.ValidatorEventArgs e)
+    private void ValidateDateTime(ValidatorEventArgs e)
     {
         if (_validatedDateTime is null)
         {
-            e.Status = Validations.Enums.ValidationStatus.Error;
+            e.Status = ValidationStatus.Error;
             e.ErrorText = "Date/time is required.";
         }
         else
         {
-            e.Status = Validations.Enums.ValidationStatus.Success;
+            e.Status = ValidationStatus.Success;
         }
     }
 }

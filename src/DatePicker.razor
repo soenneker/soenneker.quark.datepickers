@@ -4,16 +4,13 @@
 @using Microsoft.JSInterop
 @using Soenneker.Blazor.Extensions.EventCallback
 @using Soenneker.Extensions.String
-@using Soenneker.Quark.Components.Builders
-@using Soenneker.Quark.Components.Builders.Colors
-@using Soenneker.Quark.Enums.Size
-@using Soenneker.Quark.Validations
-@using Soenneker.Quark.Validations.Enums
-@inherits Soenneker.Quark.Element
-@implements Soenneker.Quark.Validations.Abstract.IValidationInput
-@inject Abstract.IDatePickerInterop DatePickerInterop
+@using Soenneker.Quark.DatePickers.Abstract
+@using Soenneker.Quark.Enums
 
-@using Soenneker.Quark.Divs
+@inherits Soenneker.Quark.Element
+@implements Soenneker.Quark.IValidationInput
+@inject IDatePickerInterop DatePickerInterop
+
 <Div OnElementRefReady="HandleContainerRefReady" @attributes="GetContainerAttributes()">
     <input @ref="_ref" type="text" @attributes="BuildAttributes()" />
 
@@ -54,6 +51,7 @@
 </Div>
 
 @code {
+    public override string? Name { get; set; } = "DatePicker";
 
     [Parameter]
     public DateOnly? Value { get; set; }
@@ -80,7 +78,7 @@
     public DateOnly? Max { get; set; }
 
     [Parameter]
-    public CssValue<ColorBuilder> Color { get; set; } = Components.Builders.Colors.Color.Primary;
+    public CssValue<ColorBuilder> Color { get; set; } = Quark.Color.Primary;
 
     [Parameter]
     public Size Size { get; set; } = Size.Default;
@@ -104,7 +102,7 @@
     private DotNetObjectReference<OutsideCloseProxy>? _outsideRef;
     private bool _open;
     private DateOnly _displayMonth = DateOnly.FromDateTime(DateTime.Today);
-    private string[] _dayNames = Array.Empty<string>();
+    private string[] _dayNames = [];
 
     private static DateOnly? Parse(ChangeEventArgs e)
     {
