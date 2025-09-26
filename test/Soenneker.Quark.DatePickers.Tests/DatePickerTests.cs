@@ -1,4 +1,4 @@
-﻿using Soenneker.Quark.DatePickers.Abstract;
+using Soenneker.Quark.DatePickers.Abstract;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
 

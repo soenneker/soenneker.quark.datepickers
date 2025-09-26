@@ -10,7 +10,7 @@ using Serilog;
 using Serilog.Debugging;
 using Soenneker.Quark.DatePickers.Registrars;
 using Soenneker.Serilog.Sinks.Browser.Blazor.Registrars;
-using Soenneker.Quark.Themes.Registrars;
+using Soenneker.Quark;
 
 namespace Soenneker.Quark.DatePickers.Demo;
 
