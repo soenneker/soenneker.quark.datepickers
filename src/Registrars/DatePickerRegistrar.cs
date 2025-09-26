@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Soenneker.Quark.DatePickers.Abstract;
 using Soenneker.Blazor.Utils.ResourceLoader.Registrars;
 
-namespace Soenneker.Quark.DatePickers.Registrars;
+namespace Soenneker.Quark;
 
 /// <summary>
 /// A Blazor Quark component, DatePicker.
