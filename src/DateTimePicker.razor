@@ -98,7 +98,7 @@
     public CssValue<ColorBuilder> Color { get; set; } = Quark.Color.Primary;
 
     [Parameter]
-    public Size Size { get; set; } = Size.Default;
+    public CssValue<SizeBuilder>? Size { get; set; } = Size.Default;
 
     [Parameter]
     public EventCallback<DateTime?> ValueChanged { get; set; }
@@ -168,9 +168,9 @@
 
     private string? GetSizeClass()
     {
-        if (Size == Size.Small)
+        if (Size?.ToString() == "size-sm")
             return "form-control-sm";
-        if (Size == Size.Large)
+        if (Size?.ToString() == "size-lg")
             return "form-control-lg";
 
         return null;
